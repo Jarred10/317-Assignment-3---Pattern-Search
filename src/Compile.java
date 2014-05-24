@@ -22,8 +22,10 @@ public class Compile {
 	public static void main(String[] args) throws IOException {
 		// Go find out if it's an expression
 		parse();
+		// Make a new file
 		File f = new File("regexp.txt");
 		f.createNewFile();
+		// Print the finite state machine to that file
 		PrintWriter wr = new PrintWriter(f);
 		wr.print(fsm.toString());
 		wr.close();
@@ -40,6 +42,7 @@ public class Compile {
 		// Otherwise we didn't make it to the end so the regular expression isn't legal
 		else
 			error();
+		// Set the last state to be the end state
 		setState(state, -2, -1, -1);
 	}
 
@@ -77,65 +80,94 @@ public class Compile {
 	}
 
 	public static int term(){
+		// Start of the term is the current last state
 		int start = state;
+		// Increment state to make space for a branching machine
 		state++;
+		// Terms are a literal
 		int fact = literal();
+		// If we have run off the end or finished the term
 		if(isLiteral()||j>=expression.length()){
+			// Then clean up the branching state and return
 			return setState(start, -2, fact, fact);
 		}
+		// Grab the next character
 		char c = expression.charAt(j);
+		// If it's closure
 		if(c == '*'){
-			j++; //consume *
+			// Consume the *
+			j++; 
+			// Branch to either the factor or continue on
 			setState(start, -2, fact, state);
+			// Factor points to itself so it can be repeated or can move onto state
 			setState(state-1, (char)fsm.ch[state-1], fact, state);
 			return start;
 		}
+		// If it's +
 		if(c == '+'){
-			j++; //consume +
+			// Consume +
+			j++; 
+			// Don't need to branch just point to the factor
 			setState(start, -2, fact, fact);
+			// Make state to loop back to the start or continue on
 			setState(state-1, (char)fsm.ch[state-1], start, state);
 			return start;
 		}
+		// If it's ?
 		if(c == '?'){
-			j++; //consume ?
+			// Consume ?
+			j++;
+			// Branch to the factor of skip past the factor
 			setState(start, -2, fact, state);
 			return start;
 		}
+		// If it's Or
 		if(c == '|'){
-			j++; //consume |
+			// Consume |
+			j++;
+			// | Is followed by a term
 			int term = term();
+			// Make a branch to the factor and the term
 			setState(start, -2, fact, term);
-			
+			// Update the state that points to the or
 			setState(term-1, (char)fsm.ch[term-1], state, state);
-
 			return start;
 		}
 		else 
+			// Else just tidy up the branching machine to point only to factor
 			return setState(start, -2, fact, fact);
 	}
 	
 	public static int literalSet() {
-		//TODO: Fix
-		// Seek the end bracket
+		// Hold the start state
 		int start = state;
+		// Case to deal with []]
 		if(expression.charAt(j) == ']'){
+			// Consume the bracket
 			j++;
+			// Branch to future states
 			setState(state, -2, state+1, state+2);
 			state++;
-			setState(state, ']', -3, -3); //-3 = place holder for end of literal set;
+			// Set the state that consumes ], -3 placeholds the end of the literal set
+			setState(state, ']', -3, -3);
 			state++;
 		}
-		
+		// While we're still inside the literal set
 		while(expression.charAt(j) != ']'){
+			// Grab the character
 			char c = expression.charAt(j);
-			j++; //save and consume character;
+			// Consume the character
+			j++; 
+			// Branch to future states
 			setState(state, -2, state+1, state+2);
 			state++;
+			// Set the state that consumes the character, -3 placeholds the end of the literal set
 			setState(state, c, -3, -3); //-3 = place holder for end of literal set;
 			state++;
 			// If we don't find the end bracket throw an error
 			if(j >= expression.length()) error();
 		}
+		// Update the reference for the last char
 		fsm.next2[state-2] = state - 1;
 		return start;
 	}
@@ -143,6 +175,7 @@ public class Compile {
 	public static int literal() {
 		// Literals are literals or we just saw a backslash so it can be any char
 		if(ignore || isLiteral()) {
+			// Make a state for it
 			setState(state, expression.charAt(j), state + 1, state + 1);
 			state++;
 			// Consume it
@@ -174,6 +207,7 @@ public class Compile {
 			// If we're looking at a close bracket then consume it
 			if (expression.charAt(j) == ']'){
 				j++;
+				// Set the references for the end state of the literal set
 				for(int i = 0; i < fsm.ch.length; i++){
 					if(fsm.next1[i] == -3){
 						fsm.next1[i] = fsm.next2[i] = state;
@@ -188,6 +222,7 @@ public class Compile {
 	}
 
 	public static int error() {
+		// Print an error to standard err.
 		System.err.println("illegal regex provided");
 		System.exit(0);
 		return -1;
