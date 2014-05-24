@@ -6,10 +6,20 @@ public class PatternSearch {
 
 	public static FSM regexp = new FSM();
 	public static File path;
-	
+
 	public static void main(String[] args) throws FileNotFoundException {
-		Scanner s = new Scanner(new File(args[0])); //scanner to read the fsm
-		
+		Scanner s = null;
+		try{
+			s = new Scanner(new File(args[0])); //scanner to read the fsm
+		}catch(Exception e){
+			System.out.println("Failed to find regular expression file.");
+		}
+		path = new File(args[1]); //path to read file from
+		if(!path.exists()){
+			System.out.println("Failed to find file to apply expression to.");
+			return;
+		}
+
 		String line = s.nextLine(); //first line of fsm
 		line = (String) line.subSequence(1, line.length() - 1); //takes off [ and ]	
 		String[] states = line.split(", "); //splits into array seperated by comma
@@ -23,26 +33,24 @@ public class PatternSearch {
 		line = s.nextLine();
 		line = (String) line.subSequence(1, line.length() - 1);
 		String[] next2 = line.split(", ");
-		
+
 		regexp.st = new int[states.length];		
 		regexp.ch = new int[chars.length];
 		regexp.next1 = new int[next1.length];
 		regexp.next2 = new int[next2.length];
-		
+
 		for(int i = 0; i < states.length; i++){ //copies read chars as integers
 			regexp.st[i] = Integer.parseInt(states[i]);
 			regexp.ch[i] = Integer.parseInt(chars[i]);
 			regexp.next1[i] = Integer.parseInt(next1[i]);
 			regexp.next2[i] = Integer.parseInt(next2[i]);
 		}
-		
-		path = new File(args[1]); //path to read file from
-		
+
 		findPattern fP = new findPattern(); //makes instance of findPattern class
 		fP.find(); //calls method to find all matches
-		
+
 		s.close(); //closes scanner
-		
+
 	}
 
 }

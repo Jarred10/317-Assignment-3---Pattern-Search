@@ -29,6 +29,7 @@ public class Compile {
 		}
 		// Go find out if it's an expression
 		parse();
+		System.out.println("Expression: " + expression);
 		File f = new File("regexp.txt");
 		f.createNewFile();
 		PrintWriter wr = new PrintWriter(f);

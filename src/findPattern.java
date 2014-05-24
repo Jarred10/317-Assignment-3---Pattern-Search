@@ -29,7 +29,7 @@ public class findPattern {
 				while(!fail && !success){ //while we haven't reached end state
 					int state = dq.removeFirst(); //pop current state
 					if(state == scan) { //if we read scan, move to bottom of deque
-						dq.addLast(scan); 
+						dq.addLast(scan); j++; //char consumption
 						if(dq.first.value == scan) fail = true; //if scan is only thing left, we failed
 					}
 					else if(state == -1) //if we get to -1 we have traversed machine and succeeded in matching 
@@ -40,7 +40,6 @@ public class findPattern {
 							dq.addLast(f.next1[state]);
 							if(f.next1[state] != f.next2[state]) //if next2 is different, add it as well
 								dq.addLast(f.next2[state]);
-							j++; //char consumption
 						}
 						//else we just move on, essentially tossing the state
 					}
