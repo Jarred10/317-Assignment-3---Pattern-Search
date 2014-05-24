@@ -8,7 +8,7 @@ public class Compile {
 	// Track how far through the expression we are
 	public static int j = 0;
 	// Grab the input expression
-	public static String expression = "b|ca";
+	public static String expression;
 	// String holding all the special chars
 	public static String specialChars = "()[]|?*+";
 	// Boolean that lets you know if you should ignore that the char you're looking at is not a literal
@@ -20,6 +20,13 @@ public class Compile {
 	public static FSM fsm = new FSM();
 
 	public static void main(String[] args) throws IOException {
+		try{
+		expression = args[0];
+		}
+		catch(Exception e){
+			System.out.println("Invalid expression entered.");
+			return;
+		}
 		// Go find out if it's an expression
 		parse();
 		File f = new File("regexp.txt");
