@@ -29,7 +29,11 @@ public class Compile {
 		}
 		// Go find out if it's an expression
 		parse();
+<<<<<<< HEAD
+		System.out.println("Expression: " + expression);
+=======
 		// Make a new file
+>>>>>>> jms/patch-1
 		File f = new File("regexp.txt");
 		f.createNewFile();
 		// Print the finite state machine to that file
